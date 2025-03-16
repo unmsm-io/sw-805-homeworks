@@ -21,12 +21,18 @@ mkdir -p build out
 # Move to build directory
 cd build
 
+# Convert relative path to absolute path
+ABS_SOURCE_FILE=$(realpath ../"$1")
+
+# Debugging: print the resolved source file path
+echo "🔍 Using source file: $ABS_SOURCE_FILE"
+
 # Run CMake with or without verbosity
 if [ "$VERBOSE" = true ]; then
-    cmake -DSOURCE_FILE="../$1" ..
+    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" ..
     cmake --build .
 else
-    cmake -DSOURCE_FILE="../$1" .. > /dev/null 2>&1
+    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" .. > /dev/null 2>&1
     cmake --build . > /dev/null 2>&1
 fi
 
