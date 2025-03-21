@@ -2,15 +2,25 @@
 
 # Check if an argument was provided
 if [ -z "$1" ]; then
-    echo "❌ Debes proporcionar un archivo C++ para compilar."
-    echo "Uso: ./build.sh src/main.cpp [--verbose|-v]"
+    echo "❌ You must provide a C++ file to compile."
+    echo "Usage: ./build.sh src/main.cpp [--openmp] [--pthreads] [--mpi] [--verbose|-v]"
     exit 1
 fi
 
-# Detect verbose flag
+# Detect flags
+ENABLE_OPENMP=OFF
+ENABLE_PTHREADS=OFF
+ENABLE_MPI=OFF
 VERBOSE=false
+
 for arg in "$@"; do
-    if [[ "$arg" == "--verbose" || "$arg" == "-v" ]]; then
+    if [[ "$arg" == "--openmp" ]]; then
+        ENABLE_OPENMP=ON
+    elif [[ "$arg" == "--pthreads" ]]; then
+        ENABLE_PTHREADS=ON
+    elif [[ "$arg" == "--mpi" ]]; then
+        ENABLE_MPI=ON
+    elif [[ "$arg" == "--verbose" || "$arg" == "-v" ]]; then
         VERBOSE=true
     fi
 done
@@ -29,10 +39,10 @@ echo "🔍 Using source file: $ABS_SOURCE_FILE"
 
 # Run CMake with or without verbosity
 if [ "$VERBOSE" = true ]; then
-    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" ..
+    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" -DENABLE_OPENMP=$ENABLE_OPENMP -DENABLE_PTHREADS=$ENABLE_PTHREADS -DENABLE_MPI=$ENABLE_MPI ..
     cmake --build .
 else
-    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" .. > /dev/null 2>&1
+    cmake -DSOURCE_FILE="$ABS_SOURCE_FILE" -DENABLE_OPENMP=$ENABLE_OPENMP -DENABLE_PTHREADS=$ENABLE_PTHREADS -DENABLE_MPI=$ENABLE_MPI .. > /dev/null 2>&1
     cmake --build . > /dev/null 2>&1
 fi
 
@@ -48,7 +58,7 @@ fi
 if [ -f "out/$EXECUTABLE_NAME" ]; then
     mv "out/$EXECUTABLE_NAME" "../out/"
 else
-    echo "❌ Error: No se pudo mover el ejecutable."
+    echo "❌ Error: Could not move the executable."
     exit 1
 fi
 
